@@ -1,0 +1,56 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Extract and Flatten Files
+        run: |
+          COUNT=$(ls HaftKhabisVIP*.zip 2>/dev/null | wc -l)
+          if [ "$COUNT" -ne 1 ]; then
+            echo "باید دقیقاً یک فایل زیپ HaftKhabisVIP*.zip در ریپو باشد، ولی $COUNT تا پیدا شد"
+            ls -la
+            exit 1
+          fi
+
+          # پاک کردن پروژه‌ی قدیمی تا فایل‌های بازمانده وارد بیلد نشوند
+          rm -rf app temp_extracted settings.gradle.kts build.gradle.kts gradle.properties
+
+          mkdir -p temp_extracted
+          unzip -o HaftKhabisVIP*.zip -d temp_extracted
+
+          SETTINGS_DIR=$(dirname $(find temp_extracted -name "settings.gradle.kts" | head -n 1))
+          if [ -n "$SETTINGS_DIR" ] && [ -d "$SETTINGS_DIR" ]; then
+            cp -r "$SETTINGS_DIR"/* .
+          fi
+
+          ls -la
+          find app/src -name "*.kt"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
+      - name: Build Debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HaftKhabisVIP-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
