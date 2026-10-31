@@ -1,0 +1,7 @@
+{
+  "name": "Haft Khabis VIP (هفت خبیث VIP)",
+  "description": "Persian card game Haft Khabis (Seven Nasty) featuring single player vs smart AI bots, online & LAN multiplayer rooms, authentic cards, real Persian rules, and soundtrack.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
